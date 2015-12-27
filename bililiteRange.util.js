@@ -244,7 +244,7 @@ bililiteRange.diff = diff; // expose
 function indent(text, tabs){
 	return text.replace(/\n/g, '\n'+tabs);
 }
-function unindent(str, count, tabwidth, start){
+function unindent(str, count, tabwidth, start, deleteRagged){
 	// count can be an integer >= 0 or Infinity.
 	// (We delete up to 'count' tabs at the beginning of each line.)
 	// If invalid, defaults to 1.
@@ -257,6 +257,9 @@ function unindent(str, count, tabwidth, start){
 	//
 	// start=true: unindent from only the start of the string.
 	// start=false: unindent at the beginning of any line in the string.
+	//
+	// deleteRagged=true:  unindent('   x', 2, 2) --> 'x'
+	// deleteRagged=false: unindent('   x', 2, 2) --> ' x'
 	tabwidth = Math.round(tabwidth);
 	count = Math.round(count);
 	if (isNaN(tabwidth) || tabwidth < 1) tabwidth = 4;
@@ -264,7 +267,11 @@ function unindent(str, count, tabwidth, start){
 	if (!isFinite(count)) count = '';
 	var tab = '\t';
 	if (isFinite(tabwidth)) {
-		tab += '| {'+tabwidth+'}';
+		if (deleteRagged) {
+			tab += '| {1,'+tabwidth+'}';
+		}else{
+			tab += '| {'+tabwidth+'}';
+		}
 	}
 	var re = new RegExp('^(?:'+tab+'){1,'+count+'}', 'g' + (start ? '' : 'm'));
 	return str.replace(re, '');
