@@ -244,17 +244,30 @@ bililiteRange.diff = diff; // expose
 function indent(text, tabs){
 	return text.replace(/\n/g, '\n'+tabs);
 }
-function unindentone(str, n, start){
-	// n is the number of spaces to consider a single tab
-	// start is true to unindent from the start of the string rather than after newlines
-	n = parseInt(n);
-	if (isNaN(n) || n < 1) n = 4;
-	var re = new RegExp((start ? '(^)' : '(\\n)')+'(\t| {'+n+'})', 'g');
-	return str.replace(re, '$1');
-}
-function unindent (str, repeat, n, start){
-	for (var i = 0; i < repeat; ++i) str = unindentone(str, n, start);
-	return str;
+function unindent(str, count, tabwidth, start){
+	// count can be an integer >= 0 or Infinity.
+	// (We delete up to 'count' tabs at the beginning of each line.)
+	// If invalid, defaults to 1.
+	//
+	// tabwidth can be an integer >= 1 or Infinity.
+	// (The number of spaces to consider a single tab.)
+	// If invalid, defaults to 4.
+	//
+	// Either can also be a string that rounds to that.
+	//
+	// start=true: unindent from only the start of the string.
+	// start=false: unindent at the beginning of any line in the string.
+	tabwidth = Math.round(tabwidth);
+	count = Math.round(count);
+	if (isNaN(tabwidth) || tabwidth < 1) tabwidth = 4;
+	if (isNaN(count) || count < 0) count = 1;
+	if (!isFinite(count)) count = '';
+	var tab = '\t';
+	if (isFinite(tabwidth)) {
+		tab += '| {'+tabwidth+'}';
+	}
+	var re = new RegExp('^(?:'+tab+'){1,'+count+'}', 'g' + (start ? '' : 'm'));
+	return str.replace(re, '');
 }
 
 })();
